@@ -283,3 +283,16 @@ int main() {
 
 
 
+// tcp 
+1.mkdir socket_programming
+2. cd socket_programming
+3.nano tcp_server.c
+4.code
+5.control o + enter + ctrl x
+6.nano tcp_client.c
+code
+7.gcc tcp_server.c -o server
+8.gcc tcp_client.c -o client
+9../server
+10../client
+
