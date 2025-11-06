@@ -227,5 +227,59 @@ int main() {
     return 0;
 }
 
+//leaky_bucket
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>  // for sleep()
+
+int main() {
+    int bucket_size, output_rate, input_packets, n;
+    int stored_packets = 0; // current amount in bucket
+
+    printf("Enter bucket size (capacity): ");
+    scanf("%d", &bucket_size);
+
+    printf("Enter output rate (packets per second): ");
+    scanf("%d", &output_rate);
+
+    printf("Enter number of seconds (time units): ");
+    scanf("%d", &n);
+
+    for (int i = 1; i <= n; i++) {
+        printf("\nTime unit %d:\n", i);
+
+        printf("Enter number of packets arriving this second: ");
+        scanf("%d", &input_packets);
+
+        // Add incoming packets to the bucket
+        if (input_packets + stored_packets > bucket_size) {
+            int dropped = (input_packets + stored_packets) - bucket_size;
+            stored_packets = bucket_size;  // bucket is now full
+            printf("Bucket overflow! Dropped %d packets.\n", dropped);
+        } else {
+            stored_packets += input_packets;
+            printf("%d packets added to bucket. Current: %d\n", input_packets, stored_packets);
+        }
+
+        // Leak out packets (output)
+        if (stored_packets < output_rate) {
+            printf("Transmitted %d packets.\n", stored_packets);
+            stored_packets = 0;
+        } else {
+            stored_packets -= output_rate;
+            printf("Transmitted %d packets. %d left in bucket.\n", output_rate, stored_packets);
+        }
+
+        // Simulate 1 second passing
+        sleep(1);
+    }
+
+    printf("\nAfter %d seconds, %d packets remain in bucket.\n", n, stored_packets);
+    printf("Simulation complete.\n");
+
+    return 0;
+}
+
 
 
