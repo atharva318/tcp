@@ -296,3 +296,12 @@ code
 9../server
 10../client
 
+//udp
+1.mkdir /udp.experiment
+2.cd -/udp,experiment
+3.nano udp_server.c
+4.client
+5.gcc udp_server.c -o udp_server 
+6.client
+7.terminal a- ./udp_server
+8. terminal b- ./udp_client "Hello UDP"
