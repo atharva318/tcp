@@ -126,3 +126,106 @@ int main() {
     return 0;
 }
 
+/// for UDP
+
+// udp_server.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define PORT 8080
+#define BUFFER_SIZE 1024
+
+int main() {
+    int sockfd;
+    char buffer[BUFFER_SIZE];
+    char *message = "Hello from UDP Server!";
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+
+    // 1. Create UDP socket
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+    printf("UDP Server socket created.\n");
+
+    // 2. Set server address
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+
+    // 3. Bind the socket with the server address
+    if (bind(sockfd, (const struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Bind failed");
+        exit(EXIT_FAILURE);
+    }
+    printf("UDP Server listening on port %d...\n", PORT);
+
+    // 4. Wait for client message
+    int n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0,
+                     (struct sockaddr *)&client_addr, &addr_len);
+    buffer[n] = '\0';
+    printf("Client: %s\n", buffer);
+
+    // 5. Send reply to client
+    sendto(sockfd, message, strlen(message), 0,
+           (const struct sockaddr *)&client_addr, addr_len);
+    printf("Message sent to client.\n");
+
+    // 6. Close socket
+    close(sockfd);
+    return 0;
+}
+
+// udp_client.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define PORT 8080
+#define BUFFER_SIZE 1024
+
+int main() {
+    int sockfd;
+    char buffer[BUFFER_SIZE];
+    char *message = "Hello from UDP Client!";
+    struct sockaddr_in serv_addr;
+    socklen_t addr_len = sizeof(serv_addr);
+
+    // 1. Create UDP socket
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+    printf("UDP Client socket created.\n");
+
+    // 2. Define server address
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(PORT);
+    serv_addr.sin_addr.s_addr = INADDR_ANY; // or use inet_addr("127.0.0.1")
+
+    // 3. Send message to server
+    sendto(sockfd, message, strlen(message), 0,
+           (const struct sockaddr *)&serv_addr, addr_len);
+    printf("Message sent to server.\n");
+
+    // 4. Receive server reply
+    int n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0,
+                     (struct sockaddr *)&serv_addr, &addr_len);
+    buffer[n] = '\0';
+    printf("Server: %s\n", buffer);
+
+    // 5. Close socket
+    close(sockfd);
+    return 0;
+}
+
+
+
